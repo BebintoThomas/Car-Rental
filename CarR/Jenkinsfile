@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        PHP_PATH = 'C:\\xampp\\php'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo '📦 Cloning repository...'
+                git 'https://github.com/BebintoThomas/Car-Rental.git'
+            }
+        }
+
+        stage('PHP Lint Check') {
+            steps {
+                echo '🔍 Running PHP lint check...'
+                bat "${env.PHP_PATH}\\php.exe -l index.php"
+            }
+        }
+
+        stage('Deploy to XAMPP') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo '🚀 Deploying to XAMPP htdocs...'
+                bat 'xcopy * C:\\xampp\\htdocs\\CarR /E /Y /I'
+            }
+        }
+
+        stage('Open in Browser') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo '🌐 Opening site in browser...'
+                bat 'start http://localhost/CarR/index.php'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo '❌ Build failed!'
+        }
+        success {
+            echo '✅ Build and deployment successful!'
+        }
+    }
+}
