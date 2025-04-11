@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    environment {
+        PHP_PATH = '/usr/bin/php' // or use `which php` to get actual path
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo '📦 Cloning repository...'
+                git branch: 'main', url: 'https://github.com/BebintoThomas/Car-Rental.git'
+            }
+        }
+
+        stage('PHP Lint Check') {
+            steps {
+                echo '🔍 Running PHP lint check...'
+                sh "${env.PHP_PATH} -l index.php"
+            }
+        }
+
+        stage('Deploy to Apache (XAMPP alternative)') {
+            steps {
+                echo '🚀 Deploying to /var/www/html/CarR...'
+                sh 'sudo cp -r * /var/www/html/CarR'
+            }
+        }
+
+        stage('Open in Browser') {
+            steps {
+                echo '🌐 Application is now deployed. Open http://localhost/CarR/index.php'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo '❌ Build failed!'
+        }
+        success {
+            echo '✅ Build and deployment successful!'
+        }
+    }
+}
