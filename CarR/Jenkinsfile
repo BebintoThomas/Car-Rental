@@ -1,0 +1,48 @@
+pipeline {
+    agent { label 'BebintoThomas' }
+
+    environment {
+        PHP_PATH = 'C:\\path\\to\\php' // Update this to the correct PHP path if different
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo '📦 Cloning repository...'
+                git 'https://github.com/BebintoThomas/Car-Rental.git'
+            }
+        }
+
+        stage('PHP Lint Check') {
+            steps {
+                echo '🔍 Running PHP lint check...'
+                bat "${env.PHP_PATH}\\php.exe -l index.php"
+            }
+        }
+
+        stage('Deploy to XAMPP') {
+            steps {
+                echo '🚀 Deploying to XAMPP...'
+                bat '''
+                xcopy /Y /E "%WORKSPACE%\\*" "C:\\xampp\\htdocs\\CarR\\"
+                '''
+            }
+        }
+
+        stage('Open in Browser') {
+            steps {
+                echo '🌐 Opening browser...'
+                bat 'start http://localhost/CarR'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo '❌ Build failed!'
+        }
+        success {
+            echo '✅ Build succeeded!'
+        }
+    }
+}
